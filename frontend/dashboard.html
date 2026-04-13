@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapmind - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="card">
+        <h1>Welcome to Mapmind</h1>
+        <p id="user-info">Loading...</p>
+        <button onclick="logout()">Logout</button>
+    </div>
+    <script src="auth.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        // Check if user is authenticated on page load
+        checkAuth();
+
+        // Fetch and display user info
+        async function loadUserInfo() {
+            const token = getToken();
+            try {
+                const response = await fetch(`${API_BASE}/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('user-info').textContent = `Hello, ${user.username}!`;
+                } else {
+                    logout();
+                }
+            } catch (error) {
+                logout();
+            }
+        }
+
+        loadUserInfo();
+    </script>
+</body>
+</html>
