@@ -1,5 +1,5 @@
 // API base URL - change this to your backend URL
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'https://mindmap-backend-gys8.onrender.com';
 
 // Utility functions
 function showError(elementId, message) {
