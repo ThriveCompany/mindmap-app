@@ -24,6 +24,7 @@
             </div>
             <button type="submit">Sign Up</button>
             <div id="signup-error" class="error" style="display: none;"></div>
+            <div id="signup-success" class="success" style="display: none;"></div>
         </form>
         <div class="link">
             <a href="login.html">Already have an account? Login</a>
@@ -37,6 +38,7 @@
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
             hideError('signup-error');
+            hideSuccess('signup-success');
             signup(username, password, confirmPassword);
         });
     </script>

@@ -20,6 +20,7 @@
             </div>
             <button type="submit">Login</button>
             <div id="login-error" class="error" style="display: none;"></div>
+            <div id="login-success" class="success" style="display: none;"></div>
         </form>
         <div class="link">
             <a href="signup.html">Don't have an account? Sign Up</a>
@@ -32,6 +33,7 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             hideError('login-error');
+            hideSuccess('login-success');
             login(username, password);
         });
     </script>

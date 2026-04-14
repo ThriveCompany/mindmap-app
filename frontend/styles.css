@@ -78,6 +78,12 @@ button:hover {
     font-size: 0.9rem;
 }
 
+.success {
+    color: #4ade80;
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+}
+
 .link {
     text-align: center;
     margin-top: 1rem;

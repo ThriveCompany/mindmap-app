@@ -13,6 +13,17 @@ function hideError(elementId) {
     element.style.display = 'none';
 }
 
+function showSuccess(elementId, message) {
+    const element = document.getElementById(elementId);
+    element.textContent = message;
+    element.style.display = 'block';
+}
+
+function hideSuccess(elementId) {
+    const element = document.getElementById(elementId);
+    element.style.display = 'none';
+}
+
 function saveToken(token) {
     localStorage.setItem('token', token);
 }
@@ -51,8 +62,10 @@ async function signup(username, password, confirmPassword) {
         });
 
         if (response.ok) {
-            alert('Signup successful! Please login.');
-            window.location.href = 'login.html';
+            showSuccess('signup-success', 'Account created successfully. Redirecting to login…');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1200);
         } else {
             const error = await response.json();
             showError('signup-error', error.detail || 'Signup failed');
@@ -76,7 +89,10 @@ async function login(username, password) {
         if (response.ok) {
             const data = await response.json();
             saveToken(data.access_token);
-            redirectToDashboard();
+            showSuccess('login-success', 'Login successful! Redirecting to your dashboard…');
+            setTimeout(() => {
+                redirectToDashboard();
+            }, 900);
         } else {
             const error = await response.json();
             showError('login-error', error.detail || 'Login failed');
