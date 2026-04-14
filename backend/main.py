@@ -98,3 +98,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 @app.get("/me", response_model=UserResponse)
 def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+@app.get("/version")
+def version():
+    return {"version": "1.0", "cors": "fixed", "origins": ["https://mindmap-app-jade-pi.vercel.app"]}
