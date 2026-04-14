@@ -3,281 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mindmap - Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Mindmap Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <div class="background">
-        <div class="blob blob1"></div>
-        <div class="blob blob2"></div>
-        <div class="blob blob3"></div>
-    </div>
-    <div class="glass-card dashboard-card">
-        <h1>Mindmap Dashboard</h1>
-        <p id="user-info" class="dashboard-greeting"></p>
-        <div class="stats">
-            <div class="stat">
-                <h3>Total Wins</h3>
-                <p id="wins">0</p>
+    <main>
+        <section class="header-panel">
+            <div class="header-copy">
+                <p class="eyebrow">Mindmap</p>
+                <h1>Strategy-based number game</h1>
             </div>
-            <div class="stat">
-                <h3>Total Losses</h3>
-                <p id="losses">0</p>
+            <div class="user-meta">
+                <div class="user-chip">
+                    <span></span>
+                    <strong id="dashboard-username">Player</strong>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
-            <div class="stat">
-                <h3>Games Played</h3>
-                <p id="games-played">0</p>
-            </div>
-            <div class="stat">
-                <h3>Win Rate</h3>
-                <p id="win-rate">0%</p>
-            </div>
+        </section>
+
+        <section id="loading-state" class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading your stats…</p>
+        </section>
+
+        <section id="empty-state" class="empty-state-banner hidden">
+            <p>No games yet. Start your first match and watch your stats grow.</p>
+        </section>
+
+        <div id="dashboard-content" class="dashboard-grid">
+            <section class="stats-grid">
+                <article class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <p class="stat-value" id="stat-wins">0</p>
+                    <p class="stat-label">Wins</p>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-icon">⚔️</div>
+                    <p class="stat-value" id="stat-losses">0</p>
+                    <p class="stat-label">Losses</p>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-icon">🎮</div>
+                    <p class="stat-value" id="stat-games">0</p>
+                    <p class="stat-label">Total Games</p>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <p class="stat-value" id="stat-winrate">0%</p>
+                    <p class="stat-label">Win Rate</p>
+                </article>
+            </section>
+
+            <section class="action-panel">
+                <article class="action-card" onclick="startGame()" role="button" tabindex="0">
+                    <div>
+                        <h3>Start 1v1 Game</h3>
+                        <p>Jump into a head-to-head challenge and test your strategy in real time.</p>
+                    </div>
+                    <button>Play Now</button>
+                </article>
+                <article class="action-card" onclick="practiceMode()" role="button" tabindex="0">
+                    <div>
+                        <h3>Practice Mode</h3>
+                        <p>Warm up with a quick practice round and sharpen your number strategy.</p>
+                    </div>
+                    <button>Practice</button>
+                </article>
+            </section>
         </div>
-        <button class="btn-primary" onclick="startGame()">Start 1v1 Game</button>
-        <button class="btn-secondary" onclick="logout()">Logout</button>
-    </div>
-    <div class="glass-card tournament-card">
-        <h2>Tournament Arena</h2>
-        <div class="tournament-form">
-            <label for="create-tournament-name">Tournament Name</label>
-            <input id="create-tournament-name" placeholder="Example: Weekend Duel" />
-            <label for="create-tournament-description">Description</label>
-            <input id="create-tournament-description" placeholder="Open to challengers" />
-            <label for="create-tournament-max-players">Max Players</label>
-            <input id="create-tournament-max-players" type="number" min="2" max="32" value="8" />
-            <button class="btn-primary" onclick="createTournament()">Create Tournament</button>
-            <div id="tournament-form-message" class="success" style="display:none;"></div>
-            <div id="tournament-form-error" class="error" style="display:none;"></div>
-        </div>
-        <div class="tournament-list">
-            <h3>Available Tournaments</h3>
-            <div id="tournaments-container" class="tournament-list-grid"></div>
-        </div>
-        <div id="tournament-details" class="tournament-details hidden">
-            <h3>Tournament Details</h3>
-            <div id="tournament-info"></div>
-            <div id="tournament-standings" class="standings-grid"></div>
-        </div>
-    </div>
+    </main>
+
     <script src="auth.js"></script>
-    <script>
-        const API_BASE = 'https://mindmap-backend-gys8.onrender.com';
-
-        // Check if user is authenticated on page load
-        checkAuth();
-
-        function startGame() {
-            window.location.href = 'game.html';
-        }
-
-        async function loadTournaments() {
-            const token = getToken();
-            try {
-                const response = await fetch(`${API_BASE}/tournaments`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) {
-                    document.getElementById('tournaments-container').textContent = 'Unable to load tournaments right now.';
-                    return;
-                }
-                const tournaments = await response.json();
-                renderTournamentList(tournaments);
-            } catch (error) {
-                document.getElementById('tournaments-container').textContent = 'Network error while loading tournaments.';
-            }
-        }
-
-        function renderTournamentList(tournaments) {
-            const container = document.getElementById('tournaments-container');
-            container.innerHTML = '';
-            if (!tournaments.length) {
-                container.innerHTML = '<p class="empty-state">No tournaments available yet. Create one to get started.</p>';
-                return;
-            }
-            tournaments.forEach(tournament => {
-                const card = document.createElement('div');
-                card.className = 'tournament-item';
-                card.innerHTML = `
-                    <div class="tournament-item-head">
-                        <div>
-                            <strong>${tournament.name}</strong>
-                            <p>${tournament.description || 'No description'}</p>
-                        </div>
-                        <span class="tournament-status ${tournament.status}">${tournament.status.replace('_', ' ')}</span>
-                    </div>
-                    <div class="tournament-meta">
-                        <span>Players: ${tournament.current_players}/${tournament.max_players}</span>
-                        <span>Created: ${formatDate(tournament.created_at)}</span>
-                    </div>
-                    <div class="tournament-actions">
-                        <button class="small-btn" onclick="viewTournament(${tournament.id})">View</button>
-                        <button class="small-btn" onclick="joinTournament(${tournament.id})">Join</button>
-                        <button class="small-btn" onclick="startTournament(${tournament.id})">Start</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        async function createTournament() {
-            const token = getToken();
-            const name = document.getElementById('create-tournament-name').value.trim();
-            const description = document.getElementById('create-tournament-description').value.trim();
-            const maxPlayers = Number(document.getElementById('create-tournament-max-players').value) || 8;
-            const formError = document.getElementById('tournament-form-error');
-            const formMessage = document.getElementById('tournament-form-message');
-            formError.style.display = 'none';
-            formMessage.style.display = 'none';
-
-            if (!name) {
-                formError.textContent = 'Tournament name is required.';
-                formError.style.display = 'block';
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/tournaments`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ name, description, max_players: maxPlayers })
-                });
-                if (!response.ok) {
-                    const error = await response.json();
-                    formError.textContent = error.detail || 'Unable to create tournament.';
-                    formError.style.display = 'block';
-                    return;
-                }
-                formMessage.textContent = 'Tournament created successfully!';
-                formMessage.style.display = 'block';
-                document.getElementById('create-tournament-name').value = '';
-                document.getElementById('create-tournament-description').value = '';
-                document.getElementById('create-tournament-max-players').value = '8';
-                loadTournaments();
-            } catch (error) {
-                formError.textContent = 'Network error while creating tournament.';
-                formError.style.display = 'block';
-            }
-        }
-
-        async function joinTournament(tournamentId) {
-            const token = getToken();
-            try {
-                const response = await fetch(`${API_BASE}/tournaments/${tournamentId}/join`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) {
-                    const error = await response.json();
-                    alert(error.detail || 'Unable to join tournament.');
-                    return;
-                }
-                alert('Joined tournament successfully!');
-                loadTournaments();
-                viewTournament(tournamentId);
-            } catch (error) {
-                alert('Network error while joining tournament.');
-            }
-        }
-
-        async function startTournament(tournamentId) {
-            const token = getToken();
-            try {
-                const response = await fetch(`${API_BASE}/tournaments/${tournamentId}/start`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                if (!response.ok) {
-                    const error = await response.json();
-                    alert(error.detail || 'Unable to start tournament.');
-                    return;
-                }
-                alert('Tournament started!');
-                loadTournaments();
-                viewTournament(tournamentId);
-            } catch (error) {
-                alert('Network error while starting tournament.');
-            }
-        }
-
-        async function viewTournament(tournamentId) {
-            const token = getToken();
-            try {
-                const response = await fetch(`${API_BASE}/tournaments/${tournamentId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) {
-                    document.getElementById('tournament-info').textContent = 'Unable to load tournament details.';
-                    document.getElementById('tournament-details').classList.add('hidden');
-                    return;
-                }
-                const tournament = await response.json();
-                const info = document.getElementById('tournament-info');
-                info.innerHTML = `
-                    <p><strong>Name:</strong> ${tournament.name}</p>
-                    <p><strong>Description:</strong> ${tournament.description || 'No description'}</p>
-                    <p><strong>Status:</strong> ${tournament.status}</p>
-                    <p><strong>Players:</strong> ${tournament.current_players}/${tournament.max_players}</p>
-                    <p><strong>Started at:</strong> ${formatDate(tournament.started_at)}</p>
-                    <p><strong>Completed at:</strong> ${formatDate(tournament.completed_at)}</p>
-                `;
-
-                const standings = await fetch(`${API_BASE}/tournaments/${tournamentId}/standings`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const standingsData = standings.ok ? await standings.json() : [];
-                const standingsContainer = document.getElementById('tournament-standings');
-                standingsContainer.innerHTML = '';
-                standingsContainer.innerHTML = standingsData.length ? standingsData.map(entry => `
-                    <div class="standing-item">
-                        <span>${entry.username}</span>
-                        <span>Wins: ${entry.wins}</span>
-                        <span>Losses: ${entry.losses}</span>
-                        <span>Points: ${entry.points}</span>
-                    </div>
-                `).join('') : '<p class="empty-state">No standings available yet.</p>';
-                document.getElementById('tournament-details').classList.remove('hidden');
-            } catch (error) {
-                document.getElementById('tournament-info').textContent = 'Network error while loading tournament.';
-                document.getElementById('tournament-details').classList.add('hidden');
-            }
-        }
-
-        function formatDate(isoDate) {
-            if (!isoDate) return 'Not available';
-            return new Date(isoDate).toLocaleString();
-        }
-
-        async function loadUserInfo() {
-            const token = getToken();
-            try {
-                const response = await fetch(`${API_BASE}/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                if (response.ok) {
-                    const user = await response.json();
-                    document.getElementById('user-info').textContent = `Hello, ${user.username}!`;
-                    document.getElementById('wins').textContent = user.wins;
-                    document.getElementById('losses').textContent = user.losses;
-                    document.getElementById('games-played').textContent = user.games_played;
-                    document.getElementById('win-rate').textContent = `${user.win_rate}%`;
-                    loadTournaments();
-                } else {
-                    logout();
-                }
-            } catch (error) {
-                logout();
-            }
-        }
-
-        loadUserInfo();
-    </script>
+    <script src="dashboard.js"></script>
 </body>
 </html>
