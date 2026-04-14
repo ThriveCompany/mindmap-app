@@ -26,7 +26,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://mindmap-app-jade-pi.vercel.app"],  # Allow your Vercel frontend
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
