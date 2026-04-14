@@ -7,7 +7,7 @@ from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
 
-from .models import Base, User
+from .models import Base, User, Game
 from .auth import get_password_hash, authenticate_user, create_access_token, verify_token
 
 load_dotenv()
@@ -63,6 +63,27 @@ class Token(BaseModel):
 class UserResponse(BaseModel):
     id: int
     username: str
+    wins: int
+    losses: int
+    games_played: int
+    win_rate: float
+
+class GameCreate(BaseModel):
+    min_range: int = 1
+    max_range: int = 100
+    user_number: int
+
+class Guess(BaseModel):
+    guess: int
+
+class GameResponse(BaseModel):
+    id: int
+    min_range: int
+    max_range: int
+    current_min: int
+    current_max: int
+    status: str
+    messages: list[str] = []
 
 # Security
 security = HTTPBearer()
@@ -102,7 +123,109 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 
 @app.get("/me", response_model=UserResponse)
 def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
+    win_rate = (current_user.wins / current_user.games_played * 100) if current_user.games_played > 0 else 0
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "wins": current_user.wins,
+        "losses": current_user.losses,
+        "games_played": current_user.games_played,
+        "win_rate": round(win_rate, 2)
+    }
+
+@app.post("/games", response_model=GameResponse)
+def create_game(game: GameCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not (game.min_range <= game.user_number <= game.max_range):
+        raise HTTPException(status_code=400, detail="User number must be within range")
+    import random
+    system_number = random.randint(game.min_range, game.max_range)
+    db_game = Game(
+        user_id=current_user.id,
+        user_number=game.user_number,
+        system_number=system_number,
+        min_range=game.min_range,
+        max_range=game.max_range,
+        current_min=game.min_range,
+        current_max=game.max_range
+    )
+    db.add(db_game)
+    db.commit()
+    db.refresh(db_game)
+    return {
+        "id": db_game.id,
+        "min_range": db_game.min_range,
+        "max_range": db_game.max_range,
+        "current_min": db_game.current_min,
+        "current_max": db_game.current_max,
+        "status": db_game.status,
+        "messages": [f"Range: {db_game.min_range} – {db_game.max_range}", "Lock in your number", f"You locked: {db_game.user_number}"]
+    }
+
+@app.post("/games/{game_id}/guess", response_model=GameResponse)
+def submit_guess(game_id: int, guess_data: Guess, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    game = db.query(Game).filter(Game.id == game_id, Game.user_id == current_user.id).first()
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    if game.status != "active":
+        raise HTTPException(status_code=400, detail="Game is not active")
+    if not (game.current_min <= guess_data.guess <= game.current_max):
+        raise HTTPException(status_code=400, detail="Guess must be within current range")
+    
+    messages = [f"Is your number {guess_data.guess}?"]
+    if guess_data.guess < game.system_number:
+        messages.append("Higher ⬆️")
+        game.current_min = guess_data.guess + 1
+    elif guess_data.guess > game.system_number:
+        messages.append("Lower ⬇️")
+        game.current_max = guess_data.guess - 1
+    else:
+        messages.append("Yes! You win 🎉")
+        game.status = "won"
+        current_user.wins += 1
+        current_user.games_played += 1
+        db.commit()
+        return {
+            "id": game.id,
+            "min_range": game.min_range,
+            "max_range": game.max_range,
+            "current_min": game.current_min,
+            "current_max": game.current_max,
+            "status": game.status,
+            "messages": messages
+        }
+    
+    # Check if user lost (if current_min > current_max, but since system_number is within, it shouldn't happen)
+    if game.current_min > game.current_max:
+        messages.append("Impossible! You lose 😢")
+        game.status = "lost"
+        current_user.losses += 1
+        current_user.games_played += 1
+    
+    db.commit()
+    return {
+        "id": game.id,
+        "min_range": game.min_range,
+        "max_range": game.max_range,
+        "current_min": game.current_min,
+        "current_max": game.current_max,
+        "status": game.status,
+        "messages": messages
+    }
+
+@app.get("/games/{game_id}", response_model=GameResponse)
+def get_game(game_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    game = db.query(Game).filter(Game.id == game_id, Game.user_id == current_user.id).first()
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    return {
+        "id": game.id,
+        "min_range": game.min_range,
+        "max_range": game.max_range,
+        "current_min": game.current_min,
+        "current_max": game.current_max,
+        "status": game.status,
+        "messages": []
+    }
 
 @app.get("/version")
 def version():

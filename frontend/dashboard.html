@@ -3,14 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapmind - Dashboard</title>
+    <title>Mindmap - Dashboard</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="card">
-        <h1>Welcome to Mapmind</h1>
-        <p id="user-info">Loading...</p>
-        <button onclick="logout()">Logout</button>
+    <div class="background">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+    </div>
+    <div class="glass-card dashboard-card">
+        <h1>Mindmap Dashboard</h1>
+        <div id="user-info">Loading...</div>
+        <div class="stats">
+            <div class="stat">
+                <h3>Total Wins</h3>
+                <p id="wins">0</p>
+            </div>
+            <div class="stat">
+                <h3>Total Losses</h3>
+                <p id="losses">0</p>
+            </div>
+            <div class="stat">
+                <h3>Games Played</h3>
+                <p id="games-played">0</p>
+            </div>
+            <div class="stat">
+                <h3>Win Rate</h3>
+                <p id="win-rate">0%</p>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="startGame()">Start 1v1 Game</button>
+        <button class="btn-secondary" onclick="logout()">Logout</button>
     </div>
     <script src="auth.js"></script>
     <script>
@@ -19,7 +43,7 @@
         // Check if user is authenticated on page load
         checkAuth();
 
-        // Fetch and display user info
+        // Fetch and display user info and stats
         async function loadUserInfo() {
             const token = getToken();
             try {
@@ -31,12 +55,20 @@
                 if (response.ok) {
                     const user = await response.json();
                     document.getElementById('user-info').textContent = `Hello, ${user.username}!`;
+                    document.getElementById('wins').textContent = user.wins;
+                    document.getElementById('losses').textContent = user.losses;
+                    document.getElementById('games-played').textContent = user.games_played;
+                    document.getElementById('win-rate').textContent = `${user.win_rate}%`;
                 } else {
                     logout();
                 }
             } catch (error) {
                 logout();
             }
+        }
+
+        function startGame() {
+            window.location.href = 'game.html';
         }
 
         loadUserInfo();

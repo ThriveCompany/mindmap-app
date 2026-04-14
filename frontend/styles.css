@@ -65,6 +65,40 @@ body::after {
     overflow: hidden;
 }
 
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.75;
+    animation: floatBlob 18s ease-in-out infinite;
+}
+
+.blob1 {
+    width: 260px;
+    height: 260px;
+    background: rgba(34, 211, 238, 0.16);
+    top: 10%;
+    left: 15%;
+}
+
+.blob2 {
+    width: 260px;
+    height: 260px;
+    background: rgba(59, 130, 246, 0.13);
+    bottom: 5%;
+    right: 10%;
+    animation-delay: 4s;
+}
+
+.blob3 {
+    width: 200px;
+    height: 200px;
+    background: rgba(14, 165, 233, 0.12);
+    top: 35%;
+    right: 25%;
+    animation-delay: 8s;
+}
+
 .bg-blob {
     position: absolute;
     border-radius: 50%;
@@ -341,4 +375,151 @@ button:hover {
 
 .link a:hover {
     text-decoration: underline;
+}
+
+/* Dashboard Styles */
+.dashboard-card {
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.stat {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat h3 {
+    font-size: 0.9rem;
+    color: rgba(148, 163, 184, 0.9);
+    margin-bottom: 0.5rem;
+}
+
+.stat p {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 45%, #7c3aed 100%);
+    margin-bottom: 0.5rem;
+}
+
+.btn-secondary {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Game Styles */
+.game-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.game-setup, .game-ui {
+    margin-bottom: 2rem;
+}
+
+.range-input {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.range-input label {
+    font-size: 0.9rem;
+    color: rgba(148, 163, 184, 0.9);
+}
+
+.range-input input {
+    width: 80px;
+    padding: 0.5rem;
+}
+
+.number-input {
+    margin-bottom: 1rem;
+}
+
+.chat-messages {
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.message {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: rgba(34, 211, 238, 0.1);
+    color: #dbeafe;
+}
+
+.message.system {
+    background: rgba(56, 189, 248, 0.1);
+}
+
+.guess-input {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.guess-input input {
+    flex: 1;
+}
+
+.suggestions {
+    margin-bottom: 1rem;
+}
+
+#suggestion-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.suggestion-btn {
+    padding: 0.5rem 0.75rem;
+    background: rgba(34, 211, 238, 0.2);
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    border-radius: 8px;
+    color: #dbeafe;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
+.suggestion-btn:hover {
+    background: rgba(34, 211, 238, 0.3);
+}
+
+.helper {
+    margin-bottom: 1rem;
+    text-align: center;
+    color: rgba(148, 163, 184, 0.9);
+}
+
+.range-display {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.range-display h3 {
+    color: #f8fafc;
 }
