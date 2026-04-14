@@ -1,5 +1,4 @@
-// API base URL - change this to your backend URL
-const API_BASE = 'https://mindmap-backend-gys8.onrender.com';
+const API_BASE = window.MINDMAP_API_BASE || 'https://mindmap-backend-gys8.onrender.com';
 
 // Utility functions
 function showError(elementId, message) {
@@ -49,6 +48,10 @@ function saveToken(token) {
     localStorage.setItem('token', token);
 }
 
+function clearToken() {
+    localStorage.removeItem('token');
+}
+
 function getToken() {
     return localStorage.getItem('token');
 }
@@ -57,13 +60,65 @@ function redirectToDashboard() {
     window.location.href = 'dashboard.html';
 }
 
+function redirectToLogin() {
+    window.location.href = 'login.html';
+}
+
 function checkAuth() {
     const token = getToken();
     if (!token) {
-        window.location.href = 'login.html';
-        return;
+        redirectToLogin();
+        return false;
     }
-    // Optionally verify token with /me endpoint
+    return true;
+}
+
+function getAuthHeaders(headers = {}) {
+    const token = getToken();
+    if (!token) {
+        return headers;
+    }
+    return {
+        ...headers,
+        Authorization: `Bearer ${token}`,
+    };
+}
+
+async function getErrorMessage(response, fallbackMessage) {
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+        try {
+            const error = await response.json();
+            return error.detail || error.message || fallbackMessage;
+        } catch (parseError) {
+            return fallbackMessage;
+        }
+    }
+    return fallbackMessage;
+}
+
+async function authFetch(path, options = {}) {
+    const headers = getAuthHeaders(options.headers || {});
+    const response = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers,
+    });
+
+    if (response.status === 401) {
+        clearToken();
+        redirectToLogin();
+        throw new Error('Your session has expired. Please log in again.');
+    }
+
+    return response;
+}
+
+async function fetchCurrentUser() {
+    const response = await authFetch('/me');
+    if (!response.ok) {
+        throw new Error(await getErrorMessage(response, 'Unable to load your profile.'));
+    }
+    return response.json();
 }
 
 // Signup function
@@ -85,11 +140,10 @@ async function signup(username, password, confirmPassword) {
         if (response.ok) {
             showSuccess('signup-success', `Account created for ${username}. Redirecting to login…`);
             setTimeout(() => {
-                window.location.href = 'login.html';
+                redirectToLogin();
             }, 1200);
         } else {
-            const error = await response.json();
-            showError('signup-error', error.detail || 'Signup failed');
+            showError('signup-error', await getErrorMessage(response, 'Signup failed'));
         }
     } catch (error) {
         showError('signup-error', 'Network error. Please try again.');
@@ -115,8 +169,7 @@ async function login(username, password) {
                 redirectToDashboard();
             }, 900);
         } else {
-            const error = await response.json();
-            showError('login-error', error.detail || 'Login failed');
+            showError('login-error', await getErrorMessage(response, 'Login failed'));
         }
     } catch (error) {
         showError('login-error', 'Network error. Please try again.');
@@ -125,6 +178,6 @@ async function login(username, password) {
 
 // Logout function
 function logout() {
-    localStorage.removeItem('token');
-    window.location.href = 'login.html';
+    clearToken();
+    redirectToLogin();
 }

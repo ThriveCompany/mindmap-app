@@ -66,7 +66,8 @@ body::after {
     overflow: hidden;
 }
 
-.blob {
+.blob,
+.bg-blob {
     position: absolute;
     border-radius: 50%;
     filter: blur(70px);
@@ -74,7 +75,8 @@ body::after {
     animation: floatBlob 18s ease-in-out infinite;
 }
 
-.blob1 {
+.blob1,
+.blob-1 {
     width: 260px;
     height: 260px;
     background: rgba(34, 211, 238, 0.16);
@@ -82,7 +84,8 @@ body::after {
     left: 15%;
 }
 
-.blob2 {
+.blob2,
+.blob-2 {
     width: 260px;
     height: 260px;
     background: rgba(59, 130, 246, 0.13);
@@ -91,7 +94,8 @@ body::after {
     animation-delay: 4s;
 }
 
-.blob3 {
+.blob3,
+.blob-3 {
     width: 200px;
     height: 200px;
     background: rgba(14, 165, 233, 0.12);

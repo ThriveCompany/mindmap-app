@@ -3,7 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, desc, func
 from sqlalchemy.orm import sessionmaker, Session
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -96,7 +96,7 @@ class GameHistoryResponse(BaseModel):
     game_mode: str
     created_at: datetime
     completed_at: Optional[datetime]
-    moves: List[dict] = []
+    moves: List[dict] = Field(default_factory=list)
 
     class Config:
         orm_mode = True
@@ -147,7 +147,7 @@ class GameResponse(BaseModel):
     current_min: int
     current_max: int
     status: str
-    messages: list[str] = []
+    messages: List[str] = Field(default_factory=list)
 
     class Config:
         orm_mode = True
@@ -181,7 +181,7 @@ class TournamentSummaryResponse(BaseModel):
 
 class TournamentDetailResponse(TournamentSummaryResponse):
     winner_id: Optional[int]
-    entries: List[TournamentEntryResponse] = []
+    entries: List[TournamentEntryResponse] = Field(default_factory=list)
 
     class Config:
         orm_mode = True
@@ -214,6 +214,29 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
+
+def serialize_user(user: User) -> Dict[str, Any]:
+    games_played = user.games_played
+    win_rate = (user.wins / games_played * 100) if games_played > 0 else 0.0
+    avg_guesses = (user.total_guesses / games_played) if games_played > 0 else 0.0
+
+    return {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "avatar_url": user.avatar_url,
+        "bio": user.bio,
+        "wins": user.wins,
+        "losses": user.losses,
+        "games_played": games_played,
+        "win_rate": round(win_rate, 2),
+        "best_streak": user.best_streak,
+        "current_streak": user.current_streak,
+        "total_guesses": user.total_guesses,
+        "average_guesses_per_game": round(avg_guesses, 1),
+        "created_at": user.created_at,
+        "last_active": user.last_active,
+    }
 
 def check_achievements(user: User, db: Session):
     """Check and unlock achievements for a user"""
@@ -275,7 +298,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    return db_user
+    return serialize_user(db_user)
 
 @app.post("/login", response_model=Token)
 def login(user: UserLogin, db: Session = Depends(get_db)):
@@ -287,33 +310,10 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 
 @app.get("/me", response_model=UserResponse)  # type: ignore
 def read_users_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    wins = current_user.wins
-    losses = current_user.losses
-    games_played = current_user.games_played
-    win_rate = (wins / games_played * 100) if games_played > 0 else 0.0
-    avg_guesses = (current_user.total_guesses / games_played) if games_played > 0 else 0.0
-
     current_user.last_active = datetime.utcnow()
     db.commit()
     db.refresh(current_user)
-
-    return {
-        "id": current_user.id,
-        "username": current_user.username,
-        "email": current_user.email,
-        "avatar_url": current_user.avatar_url,
-        "bio": current_user.bio,
-        "wins": wins,
-        "losses": losses,
-        "games_played": games_played,
-        "win_rate": round(win_rate, 2),
-        "best_streak": current_user.best_streak,
-        "current_streak": current_user.current_streak,
-        "total_guesses": current_user.total_guesses,
-        "average_guesses_per_game": round(avg_guesses, 1),
-        "created_at": current_user.created_at,
-        "last_active": current_user.last_active
-    }
+    return serialize_user(current_user)
 
 @app.post("/games", response_model=GameResponse)
 def create_game(game: GameCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -724,30 +724,7 @@ def update_profile(profile_data: UserProfileUpdate, current_user: User = Depends
 
     db.commit()
     db.refresh(current_user)
-
-    # Return updated user data
-    wins = current_user.wins
-    games_played = current_user.games_played
-    win_rate = (wins / games_played * 100) if games_played > 0 else 0.0
-    avg_guesses = (current_user.total_guesses / games_played) if games_played > 0 else 0.0
-
-    return {
-        "id": current_user.id,
-        "username": current_user.username,
-        "email": current_user.email,
-        "avatar_url": current_user.avatar_url,
-        "bio": current_user.bio,
-        "wins": wins,
-        "losses": current_user.losses,
-        "games_played": games_played,
-        "win_rate": round(win_rate, 2),
-        "best_streak": current_user.best_streak,
-        "current_streak": current_user.current_streak,
-        "total_guesses": current_user.total_guesses,
-        "average_guesses_per_game": round(avg_guesses, 1),
-        "created_at": current_user.created_at,
-        "last_active": current_user.last_active
-    }
+    return serialize_user(current_user)
 
 @app.get("/achievements", response_model=List[AchievementResponse])
 def get_user_achievements(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):

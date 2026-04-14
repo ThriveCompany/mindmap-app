@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapmind - Signup</title>
+    <title>Mindmap - Signup</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,26 +16,25 @@
         <div class="card glass-card">
             <div class="card-header">
                 <p class="eyebrow">Welcome to</p>
-                <h1>Mapmind</h1>
+                <h1>Mindmap</h1>
             </div>
             <form id="signup-form">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required>
-            </div>
-            <div class="form-group">
-                <label for="confirm-password">Confirm Password</label>
-                <input type="password" id="confirm-password" required>
-            </div>
-            <button type="submit">Sign Up</button>
-            <div id="signup-error" class="error" style="display: none;"></div>
-            <div id="signup-success" class="success" style="display: none;"></div>
-        </form>
-        </form>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" required>
+                </div>
+                <button type="submit">Sign Up</button>
+                <div id="signup-error" class="error" style="display: none;"></div>
+                <div id="signup-success" class="success" style="display: none;"></div>
+            </form>
         <div class="link">
             <a href="login.html">Already have an account? Login</a>
         </div>
@@ -43,6 +42,10 @@
 </div>
     <script src="auth.js"></script>
     <script>
+        if (getToken()) {
+            redirectToDashboard();
+        }
+
         document.getElementById('signup-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;

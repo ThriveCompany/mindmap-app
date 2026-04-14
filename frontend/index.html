@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapmind - Redirecting...</title>
+    <title>Mindmap - Redirecting...</title>
     <script>
-        window.location.href = 'login.html';
+        const token = localStorage.getItem('token');
+        window.location.href = token ? 'dashboard.html' : 'login.html';
     </script>
 </head>
 <body>
