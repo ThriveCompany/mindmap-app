@@ -6,6 +6,7 @@ function showError(elementId, message) {
     const element = document.getElementById(elementId);
     element.textContent = message;
     element.style.display = 'block';
+    animateCardError();
 }
 
 function hideError(elementId) {
@@ -17,11 +18,31 @@ function showSuccess(elementId, message) {
     const element = document.getElementById(elementId);
     element.textContent = message;
     element.style.display = 'block';
+    animateCardSuccess();
 }
 
 function hideSuccess(elementId) {
     const element = document.getElementById(elementId);
     element.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.classList.add('page-ready');
+});
+
+function animateCardSuccess() {
+    const card = document.querySelector('.glass-card');
+    if (!card) return;
+    card.classList.add('success-glow');
+    setTimeout(() => card.classList.remove('success-glow'), 1100);
+}
+
+function animateCardError() {
+    const card = document.querySelector('.glass-card');
+    if (!card) return;
+    card.classList.remove('shake');
+    void card.offsetWidth;
+    card.classList.add('shake');
 }
 
 function saveToken(token) {

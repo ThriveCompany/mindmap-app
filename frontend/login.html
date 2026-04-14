@@ -7,9 +7,18 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="card">
-        <h1>Mapmind</h1>
-               <form id="login-form">
+    <div class="auth-page">
+        <div class="background">
+            <span class="bg-blob blob-1"></span>
+            <span class="bg-blob blob-2"></span>
+            <span class="bg-blob blob-3"></span>
+        </div>
+        <div class="card glass-card">
+            <div class="card-header">
+                <p class="eyebrow">Welcome back</p>
+                <h1>Mapmind</h1>
+            </div>
+            <form id="login-form">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" required>
@@ -22,10 +31,12 @@
             <div id="login-error" class="error" style="display: none;"></div>
             <div id="login-success" class="success" style="display: none;"></div>
         </form>
+        </form>
         <div class="link">
             <a href="signup.html">Don't have an account? Sign Up</a>
         </div>
     </div>
+</div>
     <script src="auth.js"></script>
     <script>
         document.getElementById('login-form').addEventListener('submit', function(e) {
