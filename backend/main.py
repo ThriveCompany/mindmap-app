@@ -121,16 +121,19 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     access_token = create_access_token(data={"sub": db_user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.get("/me", response_model=UserResponse)
+@app.get("/me", response_model=UserResponse)  # type: ignore
 def read_users_me(current_user: User = Depends(get_current_user)):
-    win_rate = (current_user.wins / current_user.games_played * 100) if current_user.games_played > 0 else 0
+    wins = current_user.wins
+    losses = current_user.losses
+    games_played = current_user.games_played
+    win_rate = (wins / games_played * 100) if games_played > 0 else 0.0  # type: ignore
     return {
         "id": current_user.id,
         "username": current_user.username,
-        "wins": current_user.wins,
-        "losses": current_user.losses,
-        "games_played": current_user.games_played,
-        "win_rate": round(win_rate, 2)
+        "wins": wins,
+        "losses": losses,
+        "games_played": games_played,
+        "win_rate": round(win_rate, 2)  # type: ignore
     }
 
 @app.post("/games", response_model=GameResponse)
@@ -161,28 +164,32 @@ def create_game(game: GameCreate, current_user: User = Depends(get_current_user)
         "messages": [f"Range: {db_game.min_range} – {db_game.max_range}", "Lock in your number", f"You locked: {db_game.user_number}"]
     }
 
-@app.post("/games/{game_id}/guess", response_model=GameResponse)
+@app.post("/games/{game_id}/guess", response_model=GameResponse)  # type: ignore
 def submit_guess(game_id: int, guess_data: Guess, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     game = db.query(Game).filter(Game.id == game_id, Game.user_id == current_user.id).first()
     if not game:
         raise HTTPException(status_code=404, detail="Game not found")
-    if game.status != "active":
+    status = game.status
+    if status != "active":  # type: ignore
         raise HTTPException(status_code=400, detail="Game is not active")
-    if not (game.current_min <= guess_data.guess <= game.current_max):
+    current_min = game.current_min
+    current_max = game.current_max
+    if not (current_min <= guess_data.guess <= current_max):  # type: ignore
         raise HTTPException(status_code=400, detail="Guess must be within current range")
     
     messages = [f"Is your number {guess_data.guess}?"]
-    if guess_data.guess < game.system_number:
+    system_number = game.system_number
+    if guess_data.guess < system_number:  # type: ignore
         messages.append("Higher ⬆️")
-        game.current_min = guess_data.guess + 1
-    elif guess_data.guess > game.system_number:
+        game.current_min = guess_data.guess + 1  # type: ignore
+    elif guess_data.guess > system_number:  # type: ignore
         messages.append("Lower ⬇️")
-        game.current_max = guess_data.guess - 1
+        game.current_max = guess_data.guess - 1  # type: ignore
     else:
         messages.append("Yes! You win 🎉")
-        game.status = "won"
-        current_user.wins += 1
-        current_user.games_played += 1
+        game.status = "won"  # type: ignore
+        current_user.wins = current_user.wins + 1  # type: ignore
+        current_user.games_played = current_user.games_played + 1  # type: ignore
         db.commit()
         return {
             "id": game.id,
@@ -195,11 +202,11 @@ def submit_guess(game_id: int, guess_data: Guess, current_user: User = Depends(g
         }
     
     # Check if user lost (if current_min > current_max, but since system_number is within, it shouldn't happen)
-    if game.current_min > game.current_max:
+    if game.current_min > game.current_max:  # type: ignore
         messages.append("Impossible! You lose 😢")
-        game.status = "lost"
-        current_user.losses += 1
-        current_user.games_played += 1
+        game.status = "lost"  # type: ignore
+        current_user.losses = current_user.losses + 1  # type: ignore
+        current_user.games_played = current_user.games_played + 1  # type: ignore
     
     db.commit()
     return {
