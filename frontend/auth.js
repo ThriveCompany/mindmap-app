@@ -62,7 +62,7 @@ async function signup(username, password, confirmPassword) {
         });
 
         if (response.ok) {
-            showSuccess('signup-success', 'Account created successfully. Redirecting to login…');
+            showSuccess('signup-success', `Account created for ${username}. Redirecting to login…`);
             setTimeout(() => {
                 window.location.href = 'login.html';
             }, 1200);
@@ -89,7 +89,7 @@ async function login(username, password) {
         if (response.ok) {
             const data = await response.json();
             saveToken(data.access_token);
-            showSuccess('login-success', 'Login successful! Redirecting to your dashboard…');
+            showSuccess('login-success', `Welcome back, ${username}! Redirecting to your dashboard…`);
             setTimeout(() => {
                 redirectToDashboard();
             }, 900);
