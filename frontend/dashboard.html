@@ -11,7 +11,7 @@
         <section class="header-panel">
             <div class="header-copy">
                 <p class="eyebrow">Mindmap</p>
-                <h1>Strategy-based number game</h1>
+                <h1>Strategy-based number guessing</h1>
             </div>
             <div class="user-meta">
                 <div class="user-chip">
@@ -28,10 +28,10 @@
         </section>
 
         <section id="empty-state" class="empty-state-banner hidden">
-            <p>No games yet. Start your first match and watch your stats grow.</p>
+            <p>No games yet. Start your first guided match and begin building your range strategy.</p>
         </section>
 
-        <div id="dashboard-content" class="dashboard-grid">
+        <div id="dashboard-content" class="dashboard-grid hidden">
             <section class="stats-grid">
                 <article class="stat-card">
                     <div class="stat-icon">🏆</div>
@@ -58,18 +58,23 @@
             <section class="action-panel">
                 <article class="action-card" onclick="startGame()" role="button" tabindex="0">
                     <div>
-                        <h3>Start 1v1 Game</h3>
-                        <p>Jump into a head-to-head challenge and test your strategy in real time.</p>
+                        <h3>Start Guided Match</h3>
+                        <p>Play the current guided prototype with live range tracking, midpoint help, and invalid-guess prevention.</p>
                     </div>
-                    <button>Play Now</button>
+                    <button type="button">Play Now</button>
                 </article>
-                <article class="action-card" onclick="practiceMode()" role="button" tabindex="0">
+                <article class="action-card" onclick="scrollToStrategyTips()" role="button" tabindex="0">
                     <div>
-                        <h3>Practice Mode</h3>
-                        <p>Warm up with a quick practice round and sharpen your number strategy.</p>
+                        <h3>Range Strategy Tips</h3>
+                        <p>Review the decision rules that help you narrow the interval and avoid wasting guesses.</p>
                     </div>
-                    <button>Practice</button>
+                    <button type="button">View Tips</button>
                 </article>
+            </section>
+
+            <section class="helper-panel" id="strategy-panel">
+                <span class="badge">Think in ranges</span>
+                <p id="dashboard-summary">Every guess should shrink the valid interval. When the range gets small, lean on the visible suggestions and midpoint prompt.</p>
             </section>
         </div>
     </main>

@@ -63,7 +63,8 @@ main {
 .header-panel,
 .stats-grid,
 .action-panel,
-.status-panel {
+.status-panel,
+.helper-panel {
     backdrop-filter: blur(22px);
     background: var(--panel);
     border: 1px solid var(--border);
@@ -267,6 +268,10 @@ main {
     line-height: 1.8;
 }
 
+.empty-state-banner p {
+    margin: 0;
+}
+
 .badge {
     display: inline-flex;
     align-items: center;
@@ -279,7 +284,7 @@ main {
     width: fit-content;
 }
 
-..loading-state,
+.loading-state,
 .empty-state-banner {
     display: grid;
     gap: 1rem;
